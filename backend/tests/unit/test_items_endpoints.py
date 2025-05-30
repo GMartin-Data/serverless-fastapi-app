@@ -60,4 +60,4 @@ async def test_read_one_item_not_found(async_client: AsyncClient):
     # assert the structure of the default error message
     # FastAPI provides a default {"detail": "Not Found"}.
     error_detail = response.json()
-    assert error_detail["detail"] == "Not Found"
+    assert error_detail["detail"] == "Item not found"
