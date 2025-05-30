@@ -61,5 +61,18 @@ async def update_item(item_id: int, item_update_payload: ItemCreate):
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
 
 
+@app.delete(
+    "/items/{item_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["🧺 Items"]
+)
+async def delete_item(item_id: int):
+    for idx, item_in_db in enumerate(fake_items_db):
+        if hasattr(item_in_db, "id") and item_in_db.id == item_id:
+            fake_items_db.pop(idx)
+            return None  # Corresponds to 204 No Content
+
+    # Exiting the loop means the item wasn't found
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+
+
 # Create the handler function that AWS Lambda will invoke
 handler = Mangum(app)
