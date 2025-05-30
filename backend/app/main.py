@@ -42,5 +42,10 @@ async def read_item(item_id: int):
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
 
 
+@app.get("/items", response_model=list[Item], tags=["🧺 Items"])
+async def read_all_items():
+    return fake_items_db
+
+
 # Create the handler function that AWS Lambda will invoke
 handler = Mangum(app)
