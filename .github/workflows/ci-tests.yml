@@ -11,8 +11,8 @@ on:
       - main
 
 jobs:
-  test:
-    name: Run pytest suite
+  test-and-lint:
+    name: Run linters and pytest suite
     runs-on: ubuntu-latest # Use the latest Ubuntu runner provided by GitHub
 
     strategy:
@@ -20,30 +20,33 @@ jobs:
         python-version: ["3.12"] # Test against Python 3.12
 
     steps:
-      # Step 1: Check out the repository code so the workflow can access it
       - name: Check out code
         uses: actions/checkout@v4
 
-      # Step 2: Set up the specified Python version
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
-      # Step 3: Install uv (our package manager) using the recommended script
       - name: Install uv
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.uv/bin" >> $GITHUB_PATH # Add uv's install directory to PATH
           uv --version # Verify installation
 
-      # Step 4: Install project dependencies from uv.lock
       - name: Install dependencies
         run: |
           uv pip install --system -e .  # Install main dependencies and the project itself as editable
           uv pip install --system --group dev  # Install development dependencies
 
-      # Step 5: Run tests with pytest
+      - name: Lint with ruff
+        run: |
+          ruff check .
+
+      - name: Check formatting with Ruff
+        run: |
+          ruff format --check
+
       - name: Run tests
         run: |
           pytest
