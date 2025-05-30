@@ -90,6 +90,7 @@ jobs:
         run: |
           sam deploy \
           --stack-name MyFastAPIApp \
+          --template-file template.yaml \
           --config-file samconfig.toml \
           --config-env default \
           --no-confirm-changeset \
