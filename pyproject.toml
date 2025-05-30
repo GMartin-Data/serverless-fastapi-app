@@ -4,4 +4,14 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "fastapi>=0.115.12",
+    "mangum>=0.19.0",
+]
+
+[dependency-groups]
+dev = ["httpx>=0.28.1", "pytest>=8.3.5", "pytest-asyncio>=1.0.0"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+asyncio_default_fixture_loop_scope = "function"
