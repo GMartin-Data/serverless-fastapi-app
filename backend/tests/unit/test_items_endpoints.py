@@ -11,7 +11,7 @@ async def test_create_item_success(async_client: AsyncClient):
         "price": 9.99,
         "is_offer": True,
     }
-    response = await async_client.post("/items", json=item_payload)
+    response = await async_client.post("/items/", json=item_payload)
 
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -34,7 +34,7 @@ async def test_read_one_item_success(async_client: AsyncClient):
         "price": 15.50,
         "is_offer": False,
     }
-    create_response = await async_client.post("/items", json=item_payload)
+    create_response = await async_client.post("/items/", json=item_payload)
     assert create_response.status_code == status.HTTP_201_CREATED
     created_item_id = create_response.json()["id"]
 
@@ -65,7 +65,7 @@ async def test_read_one_item_not_found(async_client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_read_all_items_when_no_items_exist(async_client: AsyncClient):
-    response = await async_client.get("/items")
+    response = await async_client.get("/items/")
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == []
@@ -83,16 +83,16 @@ async def test_read_all_items_when_items_exist(async_client: AsyncClient):
         "is_offer": True,
     }
 
-    response1 = await async_client.post("/items", json=item1_payload)
+    response1 = await async_client.post("/items/", json=item1_payload)
     assert response1.status_code == status.HTTP_201_CREATED
     item1_data = response1.json()
 
-    response2 = await async_client.post("/items", json=item2_payload)
+    response2 = await async_client.post("/items/", json=item2_payload)
     assert response2.status_code == status.HTTP_201_CREATED
     item2_data = response2.json()
 
     # Then, get all items
-    response_get_all = await async_client.get("/items")
+    response_get_all = await async_client.get("/items/")
     assert response_get_all.status_code == status.HTTP_200_OK
 
     all_items = response_get_all.json()
@@ -122,7 +122,7 @@ async def test_update_item_success(async_client: AsyncClient):
         "price": 10.00,
         "is_offer": False,
     }
-    create_response = await async_client.post("/items", json=initial_payload)
+    create_response = await async_client.post("/items/", json=initial_payload)
     assert create_response.status_code == status.HTTP_201_CREATED
     created_item_id = create_response.json()["id"]
 
@@ -175,7 +175,7 @@ async def test_update_item_not_found(async_client: AsyncClient):
 async def test_update_item_invalid_price(async_client: AsyncClient):
     # First, create an item to update
     initial_payload = {"name": "Item for Price Test", "price": 20.00}
-    create_response = await async_client.post("/items", json=initial_payload)
+    create_response = await async_client.post("/items/", json=initial_payload)
     assert create_response.status_code == status.HTTP_201_CREATED
     created_item_id = create_response.json()["id"]
 
@@ -202,7 +202,7 @@ async def test_update_item_invalid_price(async_client: AsyncClient):
 async def test_delete_item_success(async_client: AsyncClient):
     # First, create an item to delete
     item_payload = {"name": "Item to Delete", "price": 7.77}
-    create_response = await async_client.post("/items", json=item_payload)
+    create_response = await async_client.post("/items/", json=item_payload)
     assert create_response.status_code == status.HTTP_201_CREATED
     created_item_id = create_response.json()["id"]
 
