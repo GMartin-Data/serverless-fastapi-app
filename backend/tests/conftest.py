@@ -1,7 +1,7 @@
 from typing import AsyncIterator
 
-from httpx import AsyncClient, ASGITransport
 import pytest_asyncio
+from httpx import ASGITransport, AsyncClient
 
 from backend.app.main import app as fastapi_app
 

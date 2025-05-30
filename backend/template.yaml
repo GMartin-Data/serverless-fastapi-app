@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  SAM template for the serverless-fastapi-app backend,
+  featuring a FastAPI application running on AWS Lambda.
+
+Globals:
+  Function:
+    Timeout: 30 # in seconds
+    MemorySize: 128 # in MB
+
+Resources:
+  RootFunction: # A logical name for our Lambda function resource
+    Type: AWS::Serverless::Function # Specifies this is a SAM Lambda function
+    Properties:
+      FunctionName: ServerlessFastAPIAppRootFunction # Optional: specify a name for the Lambda in AWS
+      CodeUri: ./app/ # Path to your Lambda function's code (relative to this template.yaml)
+      Handler: main.handler # The file and method AWS Lambda calls (main.py -> handler variable)
+      Runtime: python3.12 # Specify the Python runtime
+      Architectures: # Specify the architecture, common options are x86_64 or arm64
+        - x86_64
+      Events:
+        RootGet: # A logical name for the event source
+          Type: HttpApi # Specifies an HTTP API Gateway event (simpler, more modern)
+          Properties:
+            Path: / # The path for this endpoint
+            Method: get # The HTTP method
+
+Outputs:
+  RootApiUrl:
+    Description: "API Gateway endpoint URL for the Root function"
+    Value: !Sub "https://{ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/"

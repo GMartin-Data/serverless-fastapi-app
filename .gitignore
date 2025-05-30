@@ -140,3 +140,6 @@ dmypy.json
 
 # AWS SAM
 .aws-sam/
+
+# AWS SAM CLI specific
+backend/.aws-sam/

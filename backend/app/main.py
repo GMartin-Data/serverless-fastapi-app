@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from mangum import Mangum
 from starlette import status
 
-
 app = FastAPI()
 
 

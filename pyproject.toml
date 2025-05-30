@@ -4,14 +4,54 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = [
-    "fastapi>=0.115.12",
-    "mangum>=0.19.0",
-]
+dependencies = ["fastapi>=0.115.12", "mangum>=0.19.0"]
 
 [dependency-groups]
-dev = ["httpx>=0.28.1", "pytest>=8.3.5", "pytest-asyncio>=1.0.0"]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=8.3.5",
+    "pytest-asyncio>=1.0.0",
+    "pytest-cov>=6.1.1",
+    "ruff>=0.11.12",
+]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
 asyncio_default_fixture_loop_scope = "function"
+
+[tool.ruff]
+# Same as Black.
+line-length = 88
+indent-width = 4
+
+# Assume Python 3.12
+target-version = "py312"
+
+[tool.ruff.lint]
+# Enable Pyflakes (F) and a subset of the pycodestyle (E, W) rules.
+# Adding "I" for isort compatibility/rules.
+select = ["E4", "E7", "E9", "F", "W", "I"]
+ignore = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+[tool.coverage.run]
+source = ["backend.app"]
+omit = ["backend/tests/*", "*/__init__.py"]
+
+[tool.coverage.report]
+# Optional: if you want to always show missing lines without the CLI flag
+show_missing = true
+# Optional: To make the report cleaner by hiding fully covered files
+# skip_covered = true
