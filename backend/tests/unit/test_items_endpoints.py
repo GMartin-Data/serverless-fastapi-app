@@ -196,3 +196,32 @@ async def test_update_item_invalid_price(async_client: AsyncClient):
     assert (
         "price" in error_data["detail"][0]["loc"]
     )  # Check that the error is related to 'price'
+
+
+@pytest.mark.asyncio
+async def test_delete_item_success(async_client: AsyncClient):
+    # First, create an item to delete
+    item_payload = {"name": "Item to Delete", "price": 7.77}
+    create_response = await async_client.post("/items", json=item_payload)
+    assert create_response.status_code == status.HTTP_201_CREATED
+    created_item_id = create_response.json()["id"]
+
+    # Delete the item
+    delete_response = await async_client.delete(f"/items/{created_item_id}")
+    assert delete_response.status_code == status.HTTP_204_NO_CONTENT
+    # For 204 No Content, there should be no response body
+    assert not delete_response.content
+
+    # Verify the item is actually deleted by trying to GET it
+    get_response = await async_client.get(f"/items/{created_item_id}")
+    assert get_response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.asyncio
+async def test_delete_item_not_found(async_client: AsyncClient):
+    non_existent_item_id = 99999  # Assuming this ID won't exist
+    delete_response = await async_client.delete(f"/items/{non_existent_item_id}")
+
+    assert delete_response.status_code == status.HTTP_404_NOT_FOUND
+    error_detail = delete_response.json()
+    assert error_detail["detail"] == "Item not found"
