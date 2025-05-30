@@ -2,6 +2,13 @@ from fastapi import FastAPI
 from mangum import Mangum
 from starlette import status
 
+from .schemas import Item, ItemCreate
+
+
+# In-memory "database"
+fake_items_db = []
+item_id_counter = 0
+
 app = FastAPI()
 
 
