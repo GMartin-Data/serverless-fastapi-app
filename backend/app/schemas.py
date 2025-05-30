@@ -4,10 +4,20 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class ItemBase(BaseModel):
-    name: str
-    description: Optional[str] = None
+    name: str = Field(
+        ..., description="The name of the item", examples=["My Awesome Item"]
+    )
+    description: Optional[str] = Field(
+        default=None,
+        description="An optional description of the item",
+        examples=["A truly wonderful widget."],
+    )
     price: float = Field(gt=0, description="The price must be greater than zero.")
-    is_offer: Optional[bool] = None
+    is_offer: Optional[bool] = Field(
+        default=None,
+        description="Indicates if the item is on a special offer.",
+        examples=[True, False],
+    )
 
 
 class ItemCreate(ItemBase):
@@ -30,7 +40,9 @@ class ItemUpdate(ItemBase):
 
 class Item(ItemBase):
     # Represents the item that will be STORED.
-    id: int  # Or str if favoring UUIDs
+    id: int = Field(
+        ..., description="The unique identifier of the item", examples=[1, 42, 101]
+    )
 
     # Pydantic V2 feature for ORM (later)
     model_config = ConfigDict(from_attributes=True)
