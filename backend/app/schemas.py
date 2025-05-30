@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ItemBase(BaseModel):
@@ -33,5 +33,4 @@ class Item(ItemBase):
     id: int  # Or str if favoring UUIDs
 
     # Pydantic V2 feature for ORM (later)
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
