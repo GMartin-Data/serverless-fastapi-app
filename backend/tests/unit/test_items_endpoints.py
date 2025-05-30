@@ -111,3 +111,88 @@ async def test_read_all_items_when_items_exist(async_client: AsyncClient):
             assert item["name"] == item2_payload["name"]
 
     assert response_get_all.headers["content-type"] == "application/json"
+
+
+@pytest.mark.asyncio
+async def test_update_item_success(async_client: AsyncClient):
+    # First, create an item to update
+    initial_payload = {
+        "name": "Original Item",
+        "description": "Original description.",
+        "price": 10.00,
+        "is_offer": False,
+    }
+    create_response = await async_client.post("/items", json=initial_payload)
+    assert create_response.status_code == status.HTTP_201_CREATED
+    created_item_id = create_response.json()["id"]
+
+    # Data for updating the item
+    update_payload = {
+        "name": "Updated Item Name",
+        "description": "Updated description.",
+        "price": 12.50,
+        "is_offer": True,
+    }
+    update_response = await async_client.put(
+        f"/items/{created_item_id}", json=update_payload
+    )
+
+    assert update_response.status_code == status.HTTP_200_OK
+    updated_item_data = update_response.json()
+    assert updated_item_data["id"] == created_item_id  # ID should remain the same
+    assert updated_item_data["name"] == update_payload["name"]
+    assert updated_item_data["description"] == update_payload["description"]
+    assert updated_item_data["price"] == update_payload["price"]
+    assert updated_item_data["is_offer"] == update_payload["is_offer"]
+    assert update_response.headers["content-type"] == "application/json"
+
+    # Verify by GETting the item again
+    get_response = await async_client.get(f"/items/{created_item_id}")
+    assert get_response.status_code == status.HTTP_200_OK
+    assert get_response.json()["name"] == update_payload["name"]
+    # Could have more tests but testing "name" seems already enough
+
+
+@pytest.mark.asyncio
+async def test_update_item_not_found(async_client: AsyncClient):
+    non_existent_item_id = 99999  # Assuming this ID won't exist
+    update_payload = {
+        "name": "Non Existent Update",
+        "description": "Attempt to update non-existent item.",
+        "price": 5.00,
+        "is_offer": False,
+    }
+    response = await async_client.put(
+        f"/items/{non_existent_item_id}", json=update_payload
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    error_detail = response.json()
+    assert error_detail["detail"] == "Item not found"
+
+
+@pytest.mark.asyncio
+async def test_update_item_invalid_price(async_client: AsyncClient):
+    # First, create an item to update
+    initial_payload = {"name": "Item for Price Test", "price": 20.00}
+    create_response = await async_client.post("/items", json=initial_payload)
+    assert create_response.status_code == status.HTTP_201_CREATED
+    created_item_id = create_response.json()["id"]
+
+    # Data with invalid price for updating
+    update_payload_invalid_price = {
+        "name": "Updated Item Name",
+        "description": "Updated description.",
+        "price": -5.00,  # Invalid price (must be > 0 based on ItemCreate via ItemBase)
+        "is_offer": True,
+    }
+    response = await async_client.put(
+        f"/items/{created_item_id}", json=update_payload_invalid_price
+    )
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    # Then, check the detail of the validation error
+    error_data = response.json()
+    assert (
+        "price" in error_data["detail"][0]["loc"]
+    )  # Check that the error is related to 'price'
