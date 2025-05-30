@@ -45,3 +45,13 @@ indent-style = "space"
 skip-magic-trailing-comma = false
 # Like Black, automatically detect the appropriate line ending.
 line-ending = "auto"
+
+[tool.coverage.run]
+source = ["backend.app"]
+omit = ["backend/tests/*", "*/__init__.py"]
+
+[tool.coverage.report]
+# Optional: if you want to always show missing lines without the CLI flag
+show_missing = true
+# Optional: To make the report cleaner by hiding fully covered files
+# skip_covered = true
