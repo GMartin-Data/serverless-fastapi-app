@@ -1,9 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from mangum import Mangum
 from starlette import status
 
 from .schemas import Item, ItemCreate
-
 
 # In-memory "database"
 fake_items_db = []
@@ -21,7 +20,7 @@ async def read_root():
     "/items",
     response_model=Item,
     status_code=status.HTTP_201_CREATED,
-    tags=["🆕 Items"],
+    tags=["🧺 Items"],
 )
 async def create_item(item_payload: ItemCreate):
     global item_id_counter
@@ -31,7 +30,16 @@ async def create_item(item_payload: ItemCreate):
     new_item_data["id"] = item_id_counter
 
     created_item_model = Item(**new_item_data)
+    fake_items_db.append(created_item_model)
     return created_item_model
+
+
+@app.get("/items/{item_id}", response_model=Item, tags=["🧺 Items"])
+async def read_item(item_id: int):
+    for item_in_db in fake_items_db:
+        if item_in_db.id == item_id:
+            return item_in_db
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
 
 
 # Create the handler function that AWS Lambda will invoke
