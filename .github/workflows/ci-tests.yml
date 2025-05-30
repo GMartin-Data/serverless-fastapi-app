@@ -47,6 +47,6 @@ jobs:
         run: |
           ruff format --check
 
-      - name: Run tests
+      - name: Run tests with pytest and coverage
         run: |
-          pytest
+          pytest --cov=backend --cov-report=term-missing
