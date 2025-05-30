@@ -61,3 +61,53 @@ async def test_read_one_item_not_found(async_client: AsyncClient):
     # FastAPI provides a default {"detail": "Not Found"}.
     error_detail = response.json()
     assert error_detail["detail"] == "Item not found"
+
+
+@pytest.mark.asyncio
+async def test_read_all_items_when_no_items_exist(async_client: AsyncClient):
+    response = await async_client.get("/items")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == []
+    assert response.headers["content-type"] == "application/json"
+
+
+@pytest.mark.asyncio
+async def test_read_all_items_when_items_exist(async_client: AsyncClient):
+    # Create a couple of items first
+    item1_payload = {"name": "Item One", "price": 10.00}
+    item2_payload = {
+        "name": "Item Two",
+        "description": "Description for item two",
+        "price": 20.50,
+        "is_offer": True,
+    }
+
+    response1 = await async_client.post("/items", json=item1_payload)
+    assert response1.status_code == status.HTTP_201_CREATED
+    item1_data = response1.json()
+
+    response2 = await async_client.post("/items", json=item2_payload)
+    assert response2.status_code == status.HTTP_201_CREATED
+    item2_data = response2.json()
+
+    # Then, get all items
+    response_get_all = await async_client.get("/items")
+    assert response_get_all.status_code == status.HTTP_200_OK
+
+    all_items = response_get_all.json()
+    assert isinstance(all_items, list)
+    assert len(all_items) == 2
+
+    # ensure the structure and some key fileds of the returned data
+    for item in all_items:
+        assert "id" in item
+        assert "name" in item
+        assert "price" in item
+        # Match again the created items
+        if item["id"] == item1_data["id"]:
+            assert item["name"] == item1_payload["name"]
+        if item["id"] == item2_data["id"]:
+            assert item["name"] == item2_payload["name"]
+
+    assert response_get_all.headers["content-type"] == "application/json"
