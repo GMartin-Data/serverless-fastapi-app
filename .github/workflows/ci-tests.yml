@@ -89,7 +89,7 @@ jobs:
       - name: Deploy SAM Application
         run: |
           sam deploy \
-          --config-file samcomfig.toml \
+          --config-file samconfig.toml \
           --config-env default \
           --no-confirm-changeset \
           --no-fail-on-empty-changeset
