@@ -47,5 +47,19 @@ async def read_all_items():
     return fake_items_db
 
 
+@app.put("/items/{item_id}", response_model=Item, tags=["🧺 Items"])
+async def update_item(item_id: int, item_update_payload: ItemCreate):
+    for index, item_in_db in enumerate(fake_items_db):
+        if hasattr(item_in_db, "id") and item_in_db.id == item_id:
+            updated_item_data = item_update_payload.model_dump()
+
+            updated_item = Item(id=item_in_db.id, **updated_item_data)
+
+            fake_items_db[index] = updated_item
+            return updated_item
+
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
+
+
 # Create the handler function that AWS Lambda will invoke
 handler = Mangum(app)
