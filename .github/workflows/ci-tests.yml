@@ -40,8 +40,8 @@ jobs:
       # Step 4: Install project dependencies from uv.lock
       - name: Install dependencies
         run: |
-          uv pip install -e .  # Install main dependencies and the project itself as editable
-          uv pip install --group dev  # Install development dependencies
+          uv pip install --sytem -e .  # Install main dependencies and the project itself as editable
+          uv pip install --system --group dev  # Install development dependencies
 
       # Step 5: Run tests with pytest
       - name: Run tests
