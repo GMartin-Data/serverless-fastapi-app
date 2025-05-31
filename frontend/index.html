@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Item Management App</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header>
+        <h1>Item Management</h1>
+    </header>
+
+    <main>
+        <section id="item-creation-section">
+            <h2>Create New Item</h2>
+            <form id="create-item-form">
+                <div>
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div>
+                    <label for="description">Description:</label>
+                    <textarea id="description" name="description"></textarea>
+                </div>
+                <div>
+                    <label for="price">Price:</label>
+                    <input type="number" id="price" name="price" step="0.01" min="0.01" required>
+                </div>
+                <div>
+                    <label for="is_offer">Is on offer?</label>
+                    <input type="checkbox" id="is_offer" name="is_offer">
+                </div>
+                <button type="submit">Add Item</button>
+            </form>
+        </section>
+
+        <hr>
+
+        <section id="items-display-section">
+            <h2>Current Items</h2>
+            <ul id="items-list">
+                <p>Loading items...</p>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Item App</p>
+    </footer>
+
+    <script src="js/script.js" defer></script>
+</body>
+
+</html>
