@@ -53,8 +53,9 @@ function displayItems(items) {
             ${item.is_offer ? `<strong>On Offer!</strong> <br>` : ''}
             <small>(ID: ${item.id})</small>
             <button class="edit-btn">Edit</button>
+            <button class="delete-btn" data-id="${item.id}">Delete</button>
         `;
-        // Add event listener for the new edit button
+        // Event listener for the Edit button
         const editButton = listItem.querySelector('.edit-btn');
         if (editButton) {
             editButton.addEventListener('click', () => {
@@ -62,10 +63,20 @@ function displayItems(items) {
                 prepareEditForm({...item});
             });
         }
+
+        // Add event listener for the new Delete button
+        const deleteButton = listItem.querySelector('.delete-btn');
+        if (deleteButton) {
+            deleteButton.addEventListener('click', () => {
+                handleDeleteItem(item.id);
+            });
+        }      
+
         itemsListUl.appendChild(listItem);
     });
 }
 
+// Utility function for updating
 function prepareEditForm(item) {
     // Get the form and its elements
     const form = document.getElementById('create-item-form');
@@ -156,6 +167,36 @@ async function handleCreateItemFormSubmit(event) {
     } catch (error) {
         console.error(`❌ Error ${currentEditItemId ? 'updating' : 'creating'} item:`, error);
         alert(`Error ${currentEditItemId ? 'updating' : 'creating'} item: ${error.message}`);
+    }
+}
+
+// Function to handle item deletion
+async function handleDeleteItem(itemId) {
+    // Confirm with the user before deleting
+    if (!window.confirm(`❗Are you sure you want to delete item ID ${itemId}?`)) {
+        return; // User cancelled
+    }
+
+    try {
+        // For specific items, our backend path is /items/{id} (no trailing slash)
+        const response = await fetch(`${API_BASE_URL}/items/${itemId}`, {
+            method: 'DELETE',
+        });
+
+        if (response.status === 204) { // Successfully deleted (204 No Content)
+            console.log(`✅ Item ID ${itemId} deleted successfully.`);
+            initializePage(); // Refresh the list of items
+        } else if (response.ok) { // Other success statuses (though 204 is expected)
+            console.log(`✅ Item ID ${itemId} deleted (status: ${response.status}).`);
+            initializePage();
+        } else {
+            // Handle errors (e.g., item not found 404, or other server errors)
+            const errorData = await response.json().catch(() => ({ detail: "Unknown error during item deletion." }));
+            throw new Error(`❌ HTTP error! status: ${response.status}, Message: ${errorData.detail || "No detail"}`);
+        }
+    } catch (error) {
+        console.error(`❌ Error deleting item ID ${itemId}:`, error);
+        alert(`Error deleting item: ${error.message}`); // Simple error feedback
     }
 }
 
