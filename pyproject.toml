@@ -1,3 +1,8 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"] # Specifies that setuptools and wheel are needed to build
+build-backend = "setuptools.build_meta"    # Specifies the backend to use (setuptools)
+backend-path = ["."]                       # Optional: hints where to find the backend, "." is common
+
 [project]
 name = "serverless-fastapi-app"
 version = "0.1.0"
@@ -56,3 +61,10 @@ omit = ["backend/tests/*", "*/__init__.py"]
 show_missing = true
 # Optional: To make the report cleaner by hiding fully covered files
 # skip_covered = true
+
+[tool.setuptools.packages.find]
+where = ["."]  # Tells setuptools to look for packages in the project root directory
+include = ["backend*"]  # Tells setuptools to include 'backend' and any of its sub-packages
+                        # (e.g., backend.app, backend.app.routers)
+# By specifying `include`, other top-level directories like 'frontend' will be
+# automatically excluded from being considered Python packages by setuptools.
