@@ -1,4 +1,5 @@
 const API_BASE_URL = 'http://127.0.0.1:8000';
+let currentEditItemId = null; // To store the ID of the item being edited, or null if creating
 
 // Function to fetch all items from the backend
 async function fetchAllItems() {
@@ -43,21 +44,22 @@ function displayItems(items) {
         listItem.dataset.itemName = item.name;
         listItem.dataset.itemDescription = item.description || '';  // Handle null description
         listItem.dataset.itemPrice = item.price;
-        listItem.dataset.itemIsOffer = item.is_offer;
+        listItem.dataset.itemIsOffer = String(item.is_offer); // Ensure dataset stores string
 
         listItem.innerHTML = `
             <strong>Name:</strong> ${item.name} <br>
             <strong>Price:</strong> $${item.price.toFixed(2)} <br>
             ${item.description ? `<strong>Description:</strong> ${item.description} <br>` : ''}
             ${item.is_offer ? `<strong>On Offer!</strong> <br>` : ''}
-            <small>(ID: <span class="math-inline">\{item\.id\}\)</small\>
-            <button class="edit-btn" data-id="{item.id}">Edit</button>
+            <small>(ID: ${item.id})</small>
+            <button class="edit-btn">Edit</button>
         `;
         // Add event listener for the new edit button
         const editButton = listItem.querySelector('.edit-btn');
         if (editButton) {
             editButton.addEventListener('click', () => {
-                prepareEditForm(item);  // Pass the whole item object
+                // Pass a copy of the item to avoid issues if the item object in the list is modified elsewhere
+                prepareEditForm({...item});
             });
         }
         itemsListUl.appendChild(listItem);
@@ -113,9 +115,17 @@ async function handleCreateItemFormSubmit(event) {
         is_offer: itemIsOffer
     };
 
+    let url = `${API_BASE_URL}/items/`;
+    let method = 'POST';
+
+    if (currentEditItemId !== null) { // Check if we are in update mode
+        url = `${API_BASE_URL}/items/${currentEditItemId}`;
+        method = 'PUT';
+    }
+
     try {
-        const response = await fetch(`${API_BASE_URL}/items/`, {
-            method: 'POST',
+        const response = await fetch(url, {
+            method: method,
             headers: {
                 'Content-Type': 'application/json', // Tell the server we're sending JSON
             },
@@ -124,22 +134,28 @@ async function handleCreateItemFormSubmit(event) {
 
         if (!response.ok) {
             // If the server responded with an error status (e.g., 422 for validation)
-            const errorData = await response.json().catch(() => ({ detail: "Unknown error during item creation." }));
+            const errorData = await response.json().catch(() => ({ detail: `Unknown error during item ${currentEditItemId ? 'update' : 'creation'}.` }));
             throw new Error(`❌ HTTP error! status: ${response.status}, Message: ${errorData.detail || "No detail"}`);
         }
 
-        const createdItem = await response.json();
-        console.log('✅ Item created successfully:', createdItem);
+        const resultData = await response.json(); // This will be the created or updated item
+        console.log(`✅ Item ${currentEditItemId ? 'updated' : 'created'} successfully:`, resultData);
 
-        // Clear the form
+        // Reset form and editing state
         form.reset();
+        const submitButton = form.querySelector('button[type="submit"]');
+        const formTitle = document.querySelector('#item-creation-section h2');
+        if (formTitle) {
+            formTitle.textContent = 'Create New Item';
+        }
+        submitButton.textContent = 'Add Item';
+        currentEditItemId = null; // Reset edit mode
 
-        // Refresh the list of items to show the new one
-        initializePage(); // This will re-fetch and re-display all items
+        initializePage(); // Refresh the list
 
     } catch (error) {
-        console.error('❌ Error creating item:', error);
-        alert(`Error creating item: ${error.message}`); // Simple error feedback for the user
+        console.error(`❌ Error ${currentEditItemId ? 'updating' : 'creating'} item:`, error);
+        alert(`Error ${currentEditItemId ? 'updating' : 'creating'} item: ${error.message}`);
     }
 }
 
